@@ -159,7 +159,12 @@ def search():
 
     if 'docs' in data['response']:
         for item in data['response']['docs']:
+
             id = item['pid']
+
+            highlight = ''
+            if 'displayTitle' in data['highlighting'][id]:
+                highlight = data['highlighting'][id]['displayTitle']
 
             results.append({
                 'title': item['displayTitle'],
@@ -168,9 +173,9 @@ def search():
                 'description': item['hensonDescription'] if 'hensonDescription' in item else '',
                 'item_format': item['itemType'],
                 'extra': {
-                    'collection': item['collectionTitle'][0],
-                    'htmlSnippet': data['highlighting'][id]['displayTitle'],
-                    'thumbnail': item['thumbnail110'],
+                    'collection': item['collectionTitle'][0] if 'collectionTitle' in item  else '',
+                    'htmlSnippet': highlight,
+                    'thumbnail': item['thumbnail110'] if 'thumbnail110' in item else '',
                 },
             })
 
