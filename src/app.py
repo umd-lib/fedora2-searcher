@@ -75,7 +75,7 @@ def search():
         return {
             'endpoint': endpoint,
             'error': {
-                'msg': 'q parameter is required',
+                'msg': 'q= parameter is required',
             },
         }, 400
     query = args['q']
@@ -93,7 +93,7 @@ def search():
 
     # Execute the search
     params = {
-        'q': query,
+        'q': query.replace(":", "\\:"),
         'df': 'dmKeyword',
         'rows': rows,  # number of results
         'start': start,  # starting at this result (0 is the first result)
