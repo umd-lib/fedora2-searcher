@@ -4,6 +4,7 @@ import os
 import json
 import urllib.parse
 import requests
+import re
 
 import furl
 from flask import Flask, request
@@ -91,9 +92,24 @@ def search():
     start = int(page) * int(per_page)
     rows = per_page
 
+    quotes_pattern = r'"([^"]*)"'
+    escaped_query = query
+    if re.search(quotes_pattern, query) is None:
+        escaped_query = query.translate(str.maketrans({":": "\\:",
+                                                       "(": "\\(",
+                                                       "&": "\\&",
+                                                       ")": "\\)",
+                                                       "]": "\\]",
+                                                       "[": "\\[",
+                                                       "+": "",
+                                                       "#": "",
+                                                       "%": "",
+                                                       '"': "",
+                                                       "*": ""}))
+
     # Execute the search
     params = {
-        'q': query.replace(":", "\\:"),
+        'q': '(dmKeyword:((' + escaped_query + ')))',
         'df': 'dmKeyword',
         'rows': rows,  # number of results
         'start': start,  # starting at this result (0 is the first result)
@@ -160,11 +176,11 @@ def search():
                 highlight = data['highlighting'][id]['displayTitle']
 
             results.append({
-                'title': item['displayTitle'],
+                'title': item['displayTitle'] if 'displayTitle' in item else '',
                 'link': link.replace('{id}',
                         urllib.parse.quote_plus(id)),
                 'description': item['hensonDescription'] if 'hensonDescription' in item else '',
-                'item_format': item['itemType'],
+                'item_format': item['itemType'] if 'itemType' in item else '',
                 'extra': {
                     'collection': item['collectionTitle'][0] if 'collectionTitle' in item  else '',
                     'htmlSnippet': highlight,
